@@ -1,56 +1,45 @@
-const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const db = require('../db');
 
 module.exports = async (req, res) => {
-  if (req.method!== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
+    const { usuario, password, apodo, apellidos, edad, lugar_residencia, email, logo_elegido } = req.body;
 
-  const { usuario, password, apodo, apellidos, edad, residencia, email, logo_id } = req.body;
-
-  if (!usuario ||!password ||!apodo ||!email ||!logo_id) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios' });
-  }
-
-  try {
-    // Verificar si usuario o email ya existen
-    const [existente] = await db.query(
-      'SELECT id FROM users WHERE usuario =? OR email =?', 
-      [usuario, email]
-    );
-
-    if (existente.length > 0) {
-      return res.status(409).json({ error: 'Usuario o email ya registrado' });
+    if (!usuario ||!password ||!apodo ||!email) {
+        return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    // Encriptar password
-    const password_hash = await bcrypt.hash(password, 10);
+    try {
+        // Verificar si usuario o email ya existen
+        const [existing] = await db.query(
+            'SELECT id FROM users WHERE usuario =? OR email =?',
+            [usuario, email]
+        );
 
-    // Insertar usuario
-    const [result] = await db.query(
-      `INSERT INTO users (usuario, password_hash, apodo, apellidos, edad, residencia, email, logo_id) 
-       VALUES (?,?,?,?,?,?,?,?)`,
-      [usuario, password_hash, apodo, apellidos, edad, residencia, email, logo_id]
-    );
+        if (existing.length > 0) {
+            return res.status(409).json({ error: 'Usuario o email ya registrado' });
+        }
 
-    const userId = result.insertId;
+        const password_hash = await bcrypt.hash(password, 10);
 
-    // Crear token JWT
-    const token = jwt.sign(
-      { userId: userId, usuario: usuario }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '7d' }
-    );
+        const [result] = await db.query(
+            `INSERT INTO users (usuario, password_hash, apodo, apellidos, edad, lugar_residencia, email, logo_elegido) 
+             VALUES (?,?,?,?,?,?,?,?)`,
+            [usuario, password_hash, apodo, apellidos || null, edad || null, lugar_residencia || null, email, logo_elegido || 'Nova']
+        );
 
-    res.status(201).json({ 
-      message: 'Usuario registrado', 
-      userId: userId, 
-      token: token 
-    });
+        const userId = result.insertId;
+        const token = jwt.sign({ userId, usuario }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error en el servidor al registrar' });
-  }
+        res.status(201).json({ 
+            message: 'Usuario creado',
+            userId,
+            token,
+            theme_color: '#00bfff'
+        });
+
+    } catch (err) {
+        console.error('Error en registro:', err);
+        res.status(500).json({ error: 'Error en el servidor al registrar' });
+    }
 };
