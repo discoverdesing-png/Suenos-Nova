@@ -23,7 +23,7 @@
             justify-content: center;
             min-height: 100vh;
         }
-        .container { 
+      .container { 
             max-width: 500px; 
             width: 100%;
             background: var(--color-contenedor); 
@@ -38,41 +38,41 @@
             margin-bottom: 10px;
             font-size: 28px;
         }
-        .paso {
+      .paso {
             color: var(--color-texto-secundario);
             text-align: center;
             font-size: 14px;
             margin-bottom: 25px;
         }
-        .precio {
+      .precio {
             text-align: center;
             font-size: 48px;
             color: var(--color-primario);
             margin: 20px 0 5px 0;
             font-weight: bold;
         }
-        .precio span {
+      .precio span {
             font-size: 18px;
             color: var(--color-texto-secundario);
         }
-        .beneficios {
+      .beneficios {
             background: #0a0a12;
             border: 1px solid var(--color-primario);
             border-radius: 8px;
             padding: 20px;
             margin: 25px 0;
         }
-        .beneficios h3 {
+      .beneficios h3 {
             color: var(--color-primario);
             margin: 0 0 15px 0;
             font-size: 16px;
         }
-        .beneficios li {
+      .beneficios li {
             color: var(--color-texto-secundario);
             margin: 8px 0;
             list-style: none;
         }
-        .beneficios li:before {
+      .beneficios li:before {
             content: "✓ ";
             color: var(--color-primario);
             font-weight: bold;
@@ -80,6 +80,15 @@
         }
         #paypal-button-container {
             margin-top: 25px;
+        }
+      .cancelar {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--color-texto-secundario);
+            font-size: 14px;
+            text-decoration: underline;
+            cursor: pointer;
         }
     </style>
     <script src="https://www.paypal.com/sdk/js?client-id=AXDxdwPK9EOBGLEkaa71A&currency=USD&components=buttons"></script>
@@ -100,11 +109,18 @@
         </div>
 
         <div id="paypal-button-container"></div>
+        <a class="cancelar" onclick="cancelarRegistro()">Cancelar y borrar registro</a>
     </div>
 
     <script>
-        const userId = localStorage.getItem('userId');
-        if (!userId) window.location.href = '/index.html';
+        const userData = JSON.parse(localStorage.getItem('tempUserData'));
+        if (!userData) window.location.href = '/index.html';
+
+        function cancelarRegistro() {
+            localStorage.removeItem('tempUserData');
+            alert('Registro cancelado');
+            window.location.href = '/index.html';
+        }
 
         paypal.Buttons({
             style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
@@ -112,7 +128,7 @@
                 const res = await fetch('/api/pago/crear-orden', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId })
+                    body: JSON.stringify({ userData })
                 });
                 const data = await res.json();
                 return data.orderID;
@@ -121,11 +137,16 @@
                 const res = await fetch('/api/pago/capturar-orden', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderID: data.orderID, userId })
+                    body: JSON.stringify({ orderID: data.orderID, userData })
                 });
+                const result = await res.json();
                 if (res.ok) {
-                    alert('¡Pago completado! Plan Nova activado.');
+                    localStorage.removeItem('tempUserData');
+                    localStorage.setItem('userId', result.userId);
+                    alert('¡Pago completado! Cuenta activada.');
                     window.location.href = '/perfil.html';
+                } else {
+                    alert('Error: ' + result.error);
                 }
             }
         }).render('#paypal-button-container');
