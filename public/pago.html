@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activar Plan - Sueños-Nova</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=TU_CLIENT_ID_SANDBOX&currency=USD"></script>
+    <style>
+        :root {
+            --color-primario: #00bfff;
+            --color-primario-hover: #0099cc;
+            --color-primario-sombra: rgba(0, 191, 255, 0.3);
+            --color-fondo: #0a0a12;
+            --color-contenedor: #141420;
+            --color-texto: #ffffff;
+            --color-texto-secundario: #b0e0ff;
+        }
+        body { 
+            background: var(--color-fondo); 
+            color: var(--color-texto); 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px;
+        }
+        .container { 
+            max-width: 500px; 
+            margin: 50px auto; 
+            background: var(--color-contenedor); 
+            padding: 40px; 
+            border-radius: 12px; 
+            border: 1px solid var(--color-primario); 
+            box-shadow: 0 0 25px var(--color-primario-sombra);
+            text-align: center;
+        }
+        h1 { 
+            color: var(--color-primario); 
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .precio {
+            font-size: 48px;
+            color: var(--color-primario);
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .precio span {
+            font-size: 18px;
+            color: var(--color-texto-secundario);
+        }
+        .beneficios {
+            text-align: left;
+            margin: 30px 0;
+            background: #0a0a12;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #2a2a3a;
+        }
+        .beneficios h3 {
+            color: var(--color-primario);
+            margin-top: 0;
+        }
+        .beneficios ul {
+            list-style: none;
+            padding: 0;
+        }
+        .beneficios li {
+            padding: 8px 0;
+            color: var(--color-texto-secundario);
+        }
+        .beneficios li:before {
+            content: "✓ ";
+            color: var(--color-primario);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        #paypal-button-container {
+            margin-top: 30px;
+        }
+        .error {
+            color: #ff5577;
+            margin-top: 15px;
+            min-height: 20px;
+        }
+        .paso {
+            color: var(--color-texto-secundario);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="paso">Paso 3 de 3: Activar tu cuenta</div>
+        <h1>PLAN NOVA</h1>
+        
+        <div class="precio">$0.99 <span>USD / mes</span></div>
+        
+        <div class="beneficios">
+            <h3>Tu suscripción incluye:</h3>
+            <ul>
+                <li>Registra 1 sueño diario</li>
+                <li>Feed público de sueños</li>
+                <li>Botón "Me sentí identificado"</li>
+                <li>Perfil personalizable con temas</li>
+                <li>Sin anuncios</li>
+            </ul>
+        </div>
+
+        <div id="paypal-button-container"></div>
+        <div class="error" id="errorMsg"></div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        if (!token ||!userId) {
+            window.location.href = '/registro.html';
+        }
+
+        paypal.Buttons({
+            createOrder: async function() {
+                const res = await fetch('/api/pago/crear-orden', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ userId: userId })
+                });
+                const data = await res.json();
+                return data.orderID;
+            },
+            onApprove: async function(data) {
+                const res = await fetch('/api/pago/capturar-orden', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        orderID: data.orderID,
+                        userId: userId 
+                    })
+                });
+                
+                const result = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('plan_activo', 'true');
+                    window.location.href = '/perfil.html';
+                } else {
+                    document.getElementById('errorMsg').textContent = result.error || 'Error al procesar pago';
+                }
+            },
+            onError: function(err) {
+                document.getElementById('errorMsg').textContent = 'Error con PayPal. Intenta de nuevo.';
+                console.error(err);
+            }
+        }).render('#paypal-button-container');
+    </script>
+</body>
+</html>
