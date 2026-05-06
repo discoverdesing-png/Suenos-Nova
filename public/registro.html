@@ -1,45 +1,263 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const db = require('../db');
-
-module.exports = async (req, res) => {
-    const { usuario, password, apodo, apellidos, edad, lugar_residencia, email, logo_elegido } = req.body;
-
-    if (!usuario ||!password ||!apodo ||!email) {
-        return res.status(400).json({ error: 'Faltan campos obligatorios' });
-    }
-
-    try {
-        // Verificar si usuario o email ya existen
-        const [existing] = await db.query(
-            'SELECT id FROM users WHERE usuario =? OR email =?',
-            [usuario, email]
-        );
-
-        if (existing.length > 0) {
-            return res.status(409).json({ error: 'Usuario o email ya registrado' });
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Sueños-Nova by Pedro Simental Jacinto</title>
+    <style>
+        :root {
+            /* Tema por defecto: Azul Celeste Claro */
+            --color-primario: #00bfff;
+            --color-primario-hover: #0099cc;
+            --color-primario-sombra: rgba(0, 191, 255, 0.3);
+            --color-fondo: #0a0a12;
+            --color-contenedor: #141420;
+            --color-input: #0a0a12;
+            --color-texto: #ffffff;
+            --color-texto-secundario: #b0e0ff;
         }
 
-        const password_hash = await bcrypt.hash(password, 10);
+        body { 
+            background: var(--color-fondo); 
+            color: var(--color-texto); 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .container { 
+            max-width: 550px; 
+            margin: 0 auto; 
+            background: var(--color-contenedor); 
+            padding: 35px; 
+            border-radius: 12px; 
+            border: 1px solid var(--color-primario); 
+            box-shadow: 0 0 25px var(--color-primario-sombra);
+        }
+        h1 { 
+            color: var(--color-primario); 
+            text-align: center; 
+            margin-bottom: 5px;
+            font-size: 32px;
+            letter-spacing: 2px;
+        }
+        .subtitulo {
+            color: var(--color-texto-secundario);
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 30px;
+            font-weight: normal;
+        }
+        input, select { 
+            width: 100%; 
+            padding: 13px; 
+            margin: 8px 0; 
+            background: var(--color-input); 
+            border: 1px solid var(--color-primario); 
+            color: var(--color-texto); 
+            border-radius: 6px; 
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border: 1px solid var(--color-primario-hover);
+            box-shadow: 0 0 8px var(--color-primario-sombra);
+        }
+        label {
+            display: block;
+            margin-top: 18px;
+            color: var(--color-primario);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .logos-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .logo-option {
+            border: 2px solid #2a2a3a;
+            border-radius: 10px;
+            padding: 12px 5px;
+            cursor: pointer;
+            text-align: center;
+            background: var(--color-input);
+            transition: all 0.2s;
+        }
+        .logo-option:hover, .logo-option.selected {
+            border: 2px solid var(--color-primario);
+            background: #1a2330;
+            transform: scale(1.05);
+        }
+        .logo-option img {
+            width: 45px;
+            height: 45px;
+        }
+        .logo-option p {
+            margin: 6px 0 0 0;
+            font-size: 11px;
+            color: var(--color-texto-secundario);
+        }
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background: var(--color-primario); 
+            border: none; 
+            color: #0a0a12; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            margin-top: 25px;
+            font-size: 16px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        button:hover { 
+            background: var(--color-primario-hover); 
+            box-shadow: 0 0 15px var(--color-primario-sombra);
+        }
+        button:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .error {
+            color: #ff5577;
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+        a { color: var(--color-primario); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .login-link { text-align: center; margin-top: 25px; color: var(--color-texto-secundario); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SUEÑOS-NOVA</h1>
+        <div class="subtitulo">Crea tu cuenta y comienza a soñar</div>
+        
+        <form id="registroForm">
+            <label>Usuario *</label>
+            <input type="text" id="usuario" placeholder="Tu nombre de usuario único" required minlength="3" maxlength="50">
+            
+            <label>Contraseña *</label>
+            <input type="password" id="password" placeholder="Mínimo 6 caracteres" required minlength="6">
+            
+            <label>Apodo *</label>
+            <input type="text" id="apodo" placeholder="Como te verán los demás" required maxlength="50">
+            
+            <label>Apellidos</label>
+            <input type="text" id="apellidos" placeholder="Opcional" maxlength="100">
+            
+            <label>Edad</label>
+            <input type="number" id="edad" placeholder="Opcional" min="13" max="120">
+            
+            <label>Lugar de residencia</label>
+            <input type="text" id="residencia" placeholder="Ciudad, País" maxlength="100">
+            
+            <label>Email *</label>
+            <input type="email" id="email" placeholder="tu@email.com" required maxlength="100">
+            
+            <label>Elige tu logo *</label>
+            <div class="logos-grid" id="logosGrid"></div>
+            <input type="hidden" id="logo_id" required>
+            
+            <div class="error" id="errorMsg"></div>
+            <button type="submit" id="btnRegistro">CONTINUAR AL CUESTIONARIO</button>
+        </form>
+        
+        <div class="login-link">
+            ¿Ya tienes cuenta? <a href="/index.html">Inicia sesión</a>
+        </div>
+    </div>
 
-        const [result] = await db.query(
-            `INSERT INTO users (usuario, password_hash, apodo, apellidos, edad, lugar_residencia, email, logo_elegido) 
-             VALUES (?,?,?,?,?,?,?,?)`,
-            [usuario, password_hash, apodo, apellidos || null, edad || null, lugar_residencia || null, email, logo_elegido || 'Nova']
-        );
+    <script>
+        // Los 10 logos de la tabla logos
+        const logos = [
+            {id: 1, nombre: 'Luna', url: '/assets/logos/luna.png'},
+            {id: 2, nombre: 'Estrella', url: '/assets/logos/estrella.png'},
+            {id: 3, nombre: 'Nebulosa', url: '/assets/logos/nebulosa.png'},
+            {id: 4, nombre: 'Cometa', url: '/assets/logos/cometa.png'},
+            {id: 5, nombre: 'Galaxia', url: '/assets/logos/galaxia.png'},
+            {id: 6, nombre: 'Sueño', url: '/assets/logos/sueno.png'},
+            {id: 7, nombre: 'Nova', url: '/assets/logos/nova.png'},
+            {id: 8, nombre: 'Constelación', url: '/assets/logos/constelacion.png'},
+            {id: 9, nombre: 'Aurora', url: '/assets/logos/aurora.png'},
+            {id: 10, nombre: 'Cosmos', url: '/assets/logos/cosmos.png'}
+        ];
 
-        const userId = result.insertId;
-        const token = jwt.sign({ userId, usuario }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-        res.status(201).json({ 
-            message: 'Usuario creado',
-            userId,
-            token,
-            theme_color: '#00bfff'
+        const grid = document.getElementById('logosGrid');
+        logos.forEach(logo => {
+            const div = document.createElement('div');
+            div.className = 'logo-option';
+            div.innerHTML = `
+                <img src="${logo.url}" alt="${logo.nombre}" onerror="this.style.background='var(--color-primario)'; this.style.borderRadius='50%';">
+                <p>${logo.nombre}</p>
+            `;
+            div.onclick = () => {
+                document.querySelectorAll('.logo-option').forEach(el => el.classList.remove('selected'));
+                div.classList.add('selected');
+                document.getElementById('logo_id').value = logo.id;
+            };
+            grid.appendChild(div);
         });
 
-    } catch (err) {
-        console.error('Error en registro:', err);
-        res.status(500).json({ error: 'Error en el servidor al registrar' });
-    }
-};
+        // Enviar formulario al backend
+        document.getElementById('registroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnRegistro');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            if (!document.getElementById('logo_id').value) {
+                errorMsg.textContent = 'Debes elegir un logo';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'CREANDO CUENTA...';
+            errorMsg.textContent = '';
+
+            const data = {
+                usuario: document.getElementById('usuario').value.trim(),
+                password: document.getElementById('password').value,
+                apodo: document.getElementById('apodo').value.trim(),
+                apellidos: document.getElementById('apellidos').value.trim(),
+                edad: document.getElementById('edad').value || null,
+                residencia: document.getElementById('residencia').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                logo_id: parseInt(document.getElementById('logo_id').value)
+            };
+
+            try {
+                const res = await fetch('/api/auth/registro', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                
+                if (res.ok) {
+                    localStorage.setItem('userId', result.userId);
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('themeColor', '#00bfff'); // Guardamos tema por defecto
+                    window.location.href = '/cuestionario.html';
+                } else {
+                    errorMsg.textContent = result.error || 'Error al registrar usuario';
+                    btn.disabled = false;
+                    btn.textContent = 'CONTINUAR AL CUESTIONARIO';
+                }
+            } catch (err) {
+                errorMsg.textContent = 'Error de conexión con el servidor';
+                btn.disabled = false;
+                btn.textContent = 'CONTINUAR AL CUESTIONARIO';
+            }
+        });
+    </script>
+</body>
+</html>
