@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
                 [userId, orderID, 0.99, 'completado']
             );
 
-            res.status(200).json({ message: 'Pago completado. Bienvenido a Sueños-Nova.' });
+            res.status(200).json({ message: 'Pago completado. Plan activado.' });
         } else {
             res.status(400).json({ error: 'Pago no completado' });
         }
