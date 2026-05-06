@@ -23,7 +23,7 @@
             margin: 0; 
             padding: 0;
         }
-      .navbar {
+     .navbar {
             background: var(--color-contenedor);
             border-bottom: 1px solid var(--color-primario);
             padding: 15px 30px;
@@ -35,27 +35,27 @@
             top: 0;
             z-index: 100;
         }
-      .logo {
+     .logo {
             color: var(--color-primario);
             font-size: 24px;
             font-weight: bold;
             letter-spacing: 2px;
         }
-      .nav-links a {
+     .nav-links a {
             color: var(--color-texto-secundario);
             text-decoration: none;
             margin-left: 25px;
             font-size: 15px;
         }
-      .nav-links a:hover,.nav-links a.active {
+     .nav-links a:hover,.nav-links a.active {
             color: var(--color-primario);
         }
-      .container { 
+     .container { 
             max-width: 900px; 
             margin: 30px auto; 
             padding: 0 20px;
         }
-      .bienvenida {
+     .bienvenida {
             background: var(--color-contenedor); 
             padding: 30px; 
             border-radius: 12px; 
@@ -63,40 +63,40 @@
             box-shadow: 0 0 20px var(--color-primario-sombra);
             margin-bottom: 30px;
         }
-      .bienvenida h1 {
+     .bienvenida h1 {
             color: var(--color-primario);
             margin-top: 0;
             font-size: 32px;
         }
-      .bienvenida p {
+     .bienvenida p {
             color: var(--color-texto-secundario);
             line-height: 1.8;
             font-size: 16px;
         }
-      .card {
+     .card {
             background: var(--color-contenedor);
             padding: 25px;
             border-radius: 12px;
             border: 1px solid #2a2a3a;
             margin-bottom: 20px;
         }
-      .card h2 {
+     .card h2 {
             color: var(--color-primario);
             margin-top: 0;
             font-size: 22px;
         }
-      .metodo {
+     .metodo {
             background: #0a0a12;
             padding: 20px;
             border-radius: 8px;
             border-left: 3px solid var(--color-primario);
             margin: 15px 0;
         }
-      .metodo h3 {
+     .metodo h3 {
             color: var(--color-primario);
             margin: 0 0 10px 0;
         }
-      .metodo p {
+     .metodo p {
             color: var(--color-texto-secundario);
             margin: 5px 0;
             line-height: 1.6;
@@ -116,30 +116,30 @@
             background: var(--color-primario-hover); 
             box-shadow: 0 0 15px var(--color-primario-sombra);
         }
-      .grid {
+     .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-      .stats {
+     .stats {
             display: flex;
             justify-content: space-around;
             text-align: center;
             margin: 20px 0;
         }
-      .stat-num {
+     .stat-num {
             font-size: 32px;
             color: var(--color-primario);
             font-weight: bold;
         }
-      .stat-label {
+     .stat-label {
             color: var(--color-texto-secundario);
             font-size: 14px;
         }
         @media (max-width: 768px) {
-          .grid { grid-template-columns: 1fr; }
-          .navbar { flex-direction: column; gap: 15px; }
-          .nav-links a { margin: 0 10px; }
+         .grid { grid-template-columns: 1fr; }
+         .navbar { flex-direction: column; gap: 15px; }
+         .nav-links a { margin: 0 10px; }
         }
     </style>
 </head>
@@ -238,7 +238,6 @@
                 document.getElementById('totalSuenos').textContent = data.total_suenos || 0;
                 document.getElementById('totalLikes').textContent = data.total_likes || 0;
 
-                // Si el usuario tiene tema guardado en DB, aplicarlo
                 if (data.theme_color) {
                     document.documentElement.style.setProperty('--color-primario', data.theme_color);
                     localStorage.setItem('themeColor', data.theme_color);
