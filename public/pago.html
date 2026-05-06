@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activar Plan - Sueños-Nova</title>
-    <script src="https://developer.paypal.com/dashboard/applications/sandbox"></script>
     <style>
         :root {
             --color-primario: #00bfff;
@@ -21,51 +20,60 @@
             font-family: Arial, sans-serif; 
             margin: 0; 
             padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
         .container { 
             max-width: 500px; 
-            margin: 50px auto; 
+            width: 100%;
             background: var(--color-contenedor); 
             padding: 40px; 
             border-radius: 12px; 
             border: 1px solid var(--color-primario); 
             box-shadow: 0 0 25px var(--color-primario-sombra);
-            text-align: center;
         }
         h1 { 
             color: var(--color-primario); 
+            text-align: center; 
             margin-bottom: 10px;
             font-size: 28px;
+            letter-spacing: 2px;
+        }
+        .paso {
+            color: var(--color-texto-secundario);
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 25px;
         }
         .precio {
+            text-align: center;
             font-size: 48px;
             color: var(--color-primario);
+            margin: 20px 0 5px 0;
             font-weight: bold;
-            margin: 20px 0;
         }
         .precio span {
             font-size: 18px;
             color: var(--color-texto-secundario);
         }
         .beneficios {
-            text-align: left;
-            margin: 30px 0;
             background: #0a0a12;
-            padding: 20px;
+            border: 1px solid var(--color-primario);
             border-radius: 8px;
-            border: 1px solid #2a2a3a;
+            padding: 20px;
+            margin: 25px 0;
         }
         .beneficios h3 {
             color: var(--color-primario);
-            margin-top: 0;
-        }
-        .beneficios ul {
-            list-style: none;
-            padding: 0;
+            margin: 0 0 15px 0;
+            font-size: 16px;
         }
         .beneficios li {
-            padding: 8px 0;
             color: var(--color-texto-secundario);
+            margin: 8px 0;
+            list-style: none;
         }
         .beneficios li:before {
             content: "✓ ";
@@ -74,36 +82,31 @@
             margin-right: 8px;
         }
         #paypal-button-container {
-            margin-top: 30px;
+            margin-top: 25px;
         }
         .error {
             color: #ff5577;
+            text-align: center;
             margin-top: 15px;
-            min-height: 20px;
-        }
-        .paso {
-            color: var(--color-texto-secundario);
             font-size: 14px;
-            margin-bottom: 20px;
         }
     </style>
+    <!-- IMPORTANTE: CAMBIA TU_CLIENT_ID_SANDBOX por tu Client ID real -->
+    <script src="https://www.paypal.com/sdk/js?client-id=TU_CLIENT_ID_SANDBOX&currency=USD&components=buttons"></script>
 </head>
 <body>
     <div class="container">
         <div class="paso">Paso 3 de 3: Activar tu cuenta</div>
         <h1>PLAN NOVA</h1>
-        
         <div class="precio">$0.99 <span>USD / mes</span></div>
         
         <div class="beneficios">
             <h3>Tu suscripción incluye:</h3>
-            <ul>
-                <li>Registra 1 sueño diario</li>
-                <li>Feed público de sueños</li>
-                <li>Botón "Me sentí identificado"</li>
-                <li>Perfil personalizable con temas</li>
-                <li>Sin anuncios</li>
-            </ul>
+            <li>Registra 1 sueño diario</li>
+            <li>Feed público de sueños</li>
+            <li>Botón "Me sentí identificado"</li>
+            <li>Perfil personalizable con temas</li>
+            <li>Sin anuncios</li>
         </div>
 
         <div id="paypal-button-container"></div>
@@ -111,22 +114,23 @@
     </div>
 
     <script>
-        const token = localStorage.getItem('token');
         const userId = localStorage.getItem('userId');
-        
-        if (!token ||!userId) {
-            window.location.href = '/registro.html';
+        if (!userId) {
+            window.location.href = '/index.html';
         }
 
         paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                color:  'blue',
+                shape:  'rect',
+                label:  'pay'
+            },
             createOrder: async function() {
                 const res = await fetch('/api/pago/crear-orden', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ userId: userId })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
                 });
                 const data = await res.json();
                 return data.orderID;
@@ -134,27 +138,24 @@
             onApprove: async function(data) {
                 const res = await fetch('/api/pago/capturar-orden', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         orderID: data.orderID,
-                        userId: userId 
+                        userId 
                     })
                 });
-                
                 const result = await res.json();
+                
                 if (res.ok) {
-                    localStorage.setItem('plan_activo', 'true');
+                    alert('¡Pago completado! Plan Nova activado.');
                     window.location.href = '/perfil.html';
                 } else {
                     document.getElementById('errorMsg').textContent = result.error || 'Error al procesar pago';
                 }
             },
             onError: function(err) {
-                document.getElementById('errorMsg').textContent = 'Error con PayPal. Intenta de nuevo.';
                 console.error(err);
+                document.getElementById('errorMsg').textContent = 'Error con PayPal. Intenta de nuevo.';
             }
         }).render('#paypal-button-container');
     </script>
