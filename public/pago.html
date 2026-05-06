@@ -81,12 +81,6 @@
         #paypal-button-container {
             margin-top: 25px;
         }
-        .error {
-            color: #ff5577;
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-        }
     </style>
     <script src="https://www.paypal.com/sdk/js?client-id=AXDxdwPK9EOBGLEkaa71A&currency=USD&components=buttons"></script>
 </head>
@@ -106,22 +100,14 @@
         </div>
 
         <div id="paypal-button-container"></div>
-        <div class="error" id="errorMsg"></div>
     </div>
 
     <script>
         const userId = localStorage.getItem('userId');
-        if (!userId) {
-            window.location.href = '/index.html';
-        }
+        if (!userId) window.location.href = '/index.html';
 
         paypal.Buttons({
-            style: {
-                layout: 'vertical',
-                color:  'blue',
-                shape:  'rect',
-                label:  'pay'
-            },
+            style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
             createOrder: async function() {
                 const res = await fetch('/api/pago/crear-orden', {
                     method: 'POST',
@@ -135,22 +121,12 @@
                 const res = await fetch('/api/pago/capturar-orden', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        orderID: data.orderID,
-                        userId 
-                    })
+                    body: JSON.stringify({ orderID: data.orderID, userId })
                 });
-                const result = await res.json();
-                
                 if (res.ok) {
                     alert('¡Pago completado! Plan Nova activado.');
                     window.location.href = '/perfil.html';
-                } else {
-                    document.getElementById('errorMsg').textContent = result.error || 'Error al procesar pago';
                 }
-            },
-            onError: function(err) {
-                document.getElementById('errorMsg').textContent = 'Error con PayPal. Intenta de nuevo.';
             }
         }).render('#paypal-button-container');
     </script>
