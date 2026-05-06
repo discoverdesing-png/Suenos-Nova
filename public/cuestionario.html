@@ -1,1 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Inicial - Sueños-Nova</title>
+    <style>
+        :root {
+            --color-primario: #00bfff;
+            --color-primario-hover: #0099cc;
+            --color-primario-sombra: rgba(0, 191, 255, 0.3);
+            --color-fondo: #0a0a12;
+            --color-contenedor: #141420;
+            --color-input: #0a0a12;
+            --color-texto: #ffffff;
+            --color-texto-secundario: #b0e0ff;
+        }
 
+        body { 
+            background: var(--color-fondo); 
+            color: var(--color-texto); 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: var(--color-contenedor); 
+            padding: 35px; 
+            border-radius: 12px; 
+            border: 1px solid var(--color-primario); 
+            box-shadow: 0 0 25px var(--color-primario-sombra);
+        }
+        h1 { 
+            color: var(--color-primario); 
+            text-align: center; 
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+        .subtitulo {
+            color: var(--color-texto-secundario);
+            text-align: center;
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+        .pregunta {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--color-primario);
+            font-size: 15px;
+            font-weight: bold;
+        }
+        select, input[type="text"], input[type="number"] { 
+            width: 100%; 
+            padding: 12px; 
+            background: var(--color-input); 
+            border: 1px solid var(--color-primario); 
+            color: var(--color-texto); 
+            border-radius: 6px; 
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border: 1px solid var(--color-primario-hover);
+            box-shadow: 0 0 8px var(--color-primario-sombra);
+        }
+        .slider-container {
+            margin-top: 10px;
+        }
+        .slider {
+            width: 100%;
+            accent-color: var(--color-primario);
+        }
+        .slider-value {
+            text-align: center;
+            color: var(--color-primario);
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .radio-group label {
+            font-weight: normal;
+            color: var(--color-texto);
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        input[type="radio"] {
+            width: auto;
+            margin-right: 8px;
+            accent-color: var(--color-primario);
+        }
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background: var(--color-primario); 
+            border: none; 
+            color: #0a0a12; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            margin-top: 20px;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+        button:hover { 
+            background: var(--color-primario-hover); 
+            box-shadow: 0 0 15px var(--color-primario-sombra);
+        }
+        button:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #ff5577;
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+        .aviso {
+            background: #1a2330;
+            border: 1px solid var(--color-primario);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: var(--color-texto-secundario);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cuestionario Inicial</h1>
+        <div class="subtitulo">Solo lo llenas una vez. Nos ayuda a entender tus patrones.</div>
+        
+        <div class="aviso">
+            Este cuestionario es obligatorio para activar tu cuenta. Responde con honestidad.
+        </div>
+        
+        <form id="cuestionarioForm">
+            <div class="pregunta">
+                <label>1. ¿Despertaste en la noche?</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="desperto_noche" value="Si" required> Sí</label>
+                    <label><input type="radio" name="desperto_noche" value="No" required> No</label>
+                </div>
+            </div>
+
+            <div class="pregunta">
+                <label>2. ¿Cuál fue tu primera bebida del día?</label>
+                <select name="primera_bebida" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="Agua">Agua</option>
+                    <option value="Café">Café</option>
+                    <option value="Refresco">Refresco</option>
+                    <option value="Nada">Nada</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="pregunta">
+                <label>3. ¿Qué desayunaste?</label>
+                <input type="text" name="desayuno" placeholder="Ej: Huevos con jamón y café" required maxlength="255">
+            </div>
+
+            <div class="pregunta">
+                <label>4. ¿Qué tipo de trabajo realizas principalmente?</label>
+                <select name="tipo_trabajo" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="Fuerza física">Fuerza física</option>
+                    <option value="Trabajo mental">Trabajo mental</option>
+                    <option value="Destreza manual">Destreza manual</option>
+                    <option value="Socializar">Socializar</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="pregunta">
+                <label>5. Del 1 al 5, ¿qué tan sociable eres?</label>
+                <div class="slider-container">
+                    <input type="range" min="1" max="5" value="3" class="slider" id="sociable" name="sociable">
+                    <div class="slider-value" id="sociableValue">3</div>
+                </div>
+            </div>
+
+            <div class="pregunta">
+                <label>6. ¿Cómo fue tu cena ayer?</label>
+                <select name="cena" required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="Ligero">Ligero</option>
+                    <option value="Pesado">Pesado</option>
+                    <option value="No cené">No cené</option>
+                </select>
+            </div>
+
+            <div class="pregunta">
+                <label>7. Del 1 al 10, ¿qué tan satisfecho estás con tu rutina?</label>
+                <div class="slider-container">
+                    <input type="range" min="1" max="10" value="5" class="slider" id="satisfaccion" name="satisfaccion_rutina">
+                    <div class="slider-value" id="satisfaccionValue">5</div>
+                </div>
+            </div>
+
+            <div class="error" id="errorMsg"></div>
+            <button type="submit" id="btnEnviar">FINALIZAR REGISTRO</button>
+        </form>
+    </div>
+
+    <script>
+        // Actualizar valores de sliders
+        document.getElementById('sociable').addEventListener('input', (e) => {
+            document.getElementById('sociableValue').textContent = e.target.value;
+        });
+        document.getElementById('satisfaccion').addEventListener('input', (e) => {
+            document.getElementById('satisfaccionValue').textContent = e.target.value;
+        });
+
+        // Verificar que venga de registro
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        if (!token ||!userId) {
+            window.location.href = '/registro.html';
+        }
+
+        // Enviar cuestionario
+        document.getElementById('cuestionarioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnEnviar');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            btn.disabled = true;
+            btn.textContent = 'GUARDANDO...';
+            errorMsg.textContent = '';
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            data.user_id = userId;
+
+            try {
+                const res = await fetch('/api/survey/inicial', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                
+                if (res.ok) {
+                    window.location.href = '/pago.html';
+                } else {
+                    errorMsg.textContent = result.error || 'Error al guardar cuestionario';
+                    btn.disabled = false;
+                    btn.textContent = 'FINALIZAR REGISTRO';
+                }
+            } catch (err) {
+                errorMsg.textContent = 'Error de conexión con el servidor';
+                btn.disabled = false;
+                btn.textContent = 'FINALIZAR REGISTRO';
+            }
+        });
+    </script>
+</body>
+</html>
